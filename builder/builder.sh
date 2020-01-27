@@ -373,7 +373,7 @@ case "${cmd}" in
     shell)
         bootstrap
         printf "\n"
-        docker exec -it "$(builder)" /bin/bash
+        docker exec -it -e DOCKER_NETWORK="host" "$(builder)" /bin/bash
         ;;
     *)
         echo "usage: builder.sh [bootstrap|builder|clean|clobber|compile|commit|shell]"

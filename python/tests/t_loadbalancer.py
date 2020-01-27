@@ -19,6 +19,7 @@ spec:
   containers:
   - name: backend
     image: {environ[KAT_SERVER_DOCKER_IMAGE]}
+    imagePullPolicy: Never
     ports:
     - containerPort: 8080
     env:
