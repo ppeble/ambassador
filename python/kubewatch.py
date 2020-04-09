@@ -47,16 +47,25 @@ def kube_v1():
 
     # XXX: is there a better way to check if we are inside a cluster or not?
     if "KUBERNETES_SERVICE_HOST" in os.environ:
+        k8s_service_host = os.environ['KUBERNETES_SERVICE_HOST']
+        logger.debug(f'KUBERNETES_SERVICE_HOST found with value {k8s_service_host}, loading config')
+
         # If this goes horribly wrong and raises an exception (it shouldn't),
         # we'll crash, and Kubernetes will kill the pod. That's probably not an
         # unreasonable response.
         config.load_incluster_config()
         if "AMBASSADOR_VERIFY_SSL_FALSE" in os.environ:
+            amb_verify_ssl_false = os.environ['AMBASSADOR_VERIFY_SSL_FALSE']
+            logger.debug(f'AMBASADOR_VERIFY_SSL_FALSE found with value {amb_verify_ssl_false}')
             configuration = client.Configuration()
             configuration.verify_ssl = False
             client.Configuration.set_default(configuration)
+
+        logger.debug(f'Getting corev1 api ...')
         k8s_api = client.CoreV1Api()
     else:
+        logger.debug(f'KUBERNETES_SERVICE_HOST not found, trying to load from kube config')
+
         # Here, we might be running in docker, in which case we'll likely not
         # have any Kube secrets, and that's OK.
         try:
@@ -67,6 +76,8 @@ def kube_v1():
             logger.info("No K8s")
             pass
 
+
+    logger.debug(f'kube_v1() looks all good, returnnig k8s_api client')
     return k8s_api
 
 
@@ -159,11 +170,15 @@ def main(debug):
 
             try:
                 ret = v1.read_namespace(wanted)
+                logger.debug(f'after read_namespace call')
                 root_id = ret.metadata.uid
                 found = "namespace %s" % wanted
             except ApiException as e:
                 # This means our namespace wasn't found?
+                logger.debug("Not sure why the error is not in the log? Couldn't read namespace %s? Error: %e" % (wanted, e))
                 logger.error("couldn't read namespace %s? %s" % (wanted, e))
+
+        logger.debug(f'before root_id if statement? Weird...')
 
         if not root_id:
             # OK, so we had a crack at this and something went wrong. Give up and hardcode

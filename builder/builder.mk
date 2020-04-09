@@ -97,9 +97,13 @@ images:
 	@$(MAKE) --no-print-directory commit
 .PHONY: images
 
-AMB_IMAGE=$(DEV_REGISTRY)/$(REPO):$(shell docker images -q $(REPO):latest)
-KAT_CLI_IMAGE=$(DEV_REGISTRY)/kat-client:$(shell docker images -q kat-client:latest)
-KAT_SRV_IMAGE=$(DEV_REGISTRY)/kat-server:$(shell docker images -q kat-server:latest)
+AMB_IMAGE=$(REPO):latest#$(shell docker images -q $(REPO):latest)
+KAT_CLI_IMAGE=kat-client:latest#$(shell docker images -q kat-client:latest)
+KAT_SRV_IMAGE=kat-server:latest#$(shell docker images -q kat-server:latest)
+
+#AMB_IMAGE=$(DEV_REGISTRY)/$(REPO):$(shell docker images -q $(REPO):latest)
+#KAT_CLI_IMAGE=$(DEV_REGISTRY)/kat-client:$(shell docker images -q kat-client:latest)
+#KAT_SRV_IMAGE=$(DEV_REGISTRY)/kat-server:$(shell docker images -q kat-server:latest)
 
 export REGISTRY_ERR=$(RED)ERROR: please set the DEV_REGISTRY make/env variable to the docker registry\n       you would like to use for development$(END)
 
@@ -111,7 +115,7 @@ push: images
 export KUBECONFIG_ERR=$(RED)ERROR: please set the $(BLU)DEV_KUBECONFIG$(RED) make/env variable to the cluster\n       you would like to use for development. Note this cluster must have access\n       to $(BLU)DEV_REGISTRY$(RED) (currently $(BLD)$(DEV_REGISTRY)$(END)$(RED))$(END)
 export KUBECTL_ERR=$(RED)ERROR: preflight kubectl check failed$(END)
 
-test-ready: push preflight-cluster
+test-ready: preflight-cluster
 # XXX noop target for teleproxy tests
 	@docker exec -w /buildroot/ambassador -i $(shell $(BUILDER)) sh -c "echo bin_linux_amd64/edgectl: > Makefile"
 	@docker exec -w /buildroot/ambassador -i $(shell $(BUILDER)) sh -c "mkdir -p bin_linux_amd64"
@@ -133,7 +137,7 @@ pytest-only: sync preflight-cluster
 		-e AMBASSADOR_DOCKER_IMAGE=$(AMB_IMAGE) \
 		-e KAT_CLIENT_DOCKER_IMAGE=$(KAT_CLI_IMAGE) \
 		-e KAT_SERVER_DOCKER_IMAGE=$(KAT_SRV_IMAGE) \
-		-e KAT_IMAGE_PULL_POLICY=Always \
+		-e KAT_IMAGE_PULL_POLICY=Never \
 		-e DOCKER_NETWORK=$(DOCKER_NETWORK) \
 		-e KAT_REQ_LIMIT \
 		-e KAT_RUN_MODE \

@@ -63,6 +63,7 @@ spec:
   containers:
   - name: ambassador
     image: {image}
+    imagePullPolicy: Never
     env:
     {envs}
     - name: AMBASSADOR_NAMESPACE

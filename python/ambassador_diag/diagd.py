@@ -65,7 +65,7 @@ boot_time = datetime.datetime.now()
 tvars_cache = ExpiringDict(max_len=10, max_age_seconds=60)
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%%(asctime)s diagd %s [P%%(process)dT%%(threadName)s] %%(levelname)s: %%(message)s" % __version__,
     datefmt="%Y-%m-%d %H:%M:%S"
 )
@@ -124,7 +124,7 @@ class DiagApp (Flask):
 
     def setup(self, snapshot_path: str, bootstrap_path: str, ads_path: str,
               config_path: Optional[str], ambex_pid: int, kick: Optional[str], banner_endpoint: Optional[str],
-              k8s=False, do_checks=True, no_envoy=False, reload=False, debug=False, verbose=False,
+              k8s=False, do_checks=True, no_envoy=False, reload=False, debug=True, verbose=False,
               notices=None, validation_retries=5, allow_fs_commands=False, local_scout=False,
               report_action_keys=False):
         self.estats = EnvoyStats()
@@ -148,7 +148,7 @@ class DiagApp (Flask):
 
         # This feels like overkill.
         self.logger = logging.getLogger("ambassador.diagd")
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
         self.kubestatus = KubeStatus()
 

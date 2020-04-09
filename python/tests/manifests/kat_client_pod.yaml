@@ -10,3 +10,4 @@ spec:
   containers:
   - name: backend
     image: {environ[KAT_CLIENT_DOCKER_IMAGE]}
+    imagePullPolicy: Never
